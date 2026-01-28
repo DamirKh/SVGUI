@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--  gui.svg  –  tiny HMI panel  -->
+
+<svg
+   width="320"
+   height="240"
+   viewBox="0 0 320 240"
+   version="1.1"
+   id="svg3"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs3" />
+  <!-- Simple background -->
+  <rect
+     width="320"
+     height="240"
+     fill="#f4f4f4"
+     id="rect1"
+     x="0"
+     y="0" />
+  <!-- Status label -->
+  <text
+     id="status"
+     x="20"
+     y="40"
+     font-size="20px"
+     fill="#333333">waiting …</text>
+  <!-- Toggle button -->
+  <g
+     id="btn_toggle"
+     cursor="pointer"
+     onclick="{&#10;      fetch('/api/toggle', {method: 'POST'})&#10;        .then(() =&gt; updateStatus())&#10;        .catch(e =&gt; statusTxt.textContent = 'err');&#10;    }">
+    <rect
+       x="20"
+       y="60"
+       width="100"
+       height="40"
+       rx="6"
+       fill="#4caf50"
+       id="rect2" />
+    <text
+       x="70"
+       y="85"
+       text-anchor="middle"
+       fill="#ffffff"
+       font-size="14px"
+       id="text2">TOGGLE</text>
+  </g>
+  <!-- Refresh status button -->
+  <g
+     id="btn_status"
+     cursor="pointer">
+    <rect
+       x="140"
+       y="60"
+       width="100"
+       height="40"
+       rx="6"
+       fill="#2196f3"
+       id="rect3" />
+    <text
+       x="190"
+       y="85"
+       text-anchor="middle"
+       fill="#ffffff"
+       font-size="14px"
+       id="text3">REFRESH</text>
+  </g>
+  <!-- Embedded logic -->
+  <script
+     type="application/ecmascript"
+     id="script3"><![CDATA[
+    const statusTxt = document.getElementById('status');
+
+    function updateStatus() {
+      fetch('/api/status')
+        .then(r => r.text())
+        .then(t => statusTxt.textContent = t)
+        .catch(e => statusTxt.textContent = 'err');
+    }
+
+
+
+    document.getElementById('btn_status').addEventListener('click', updateStatus);
+
+    // initial read
+    updateStatus();
+  ]]></script>
+</svg>
