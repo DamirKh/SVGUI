@@ -1,22 +1,233 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>HMI Debug Panel</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 2rem; }
-        h1  { font-size: 1.5rem; }
-        a   { display: block; margin: 0.5rem 0; }
-    </style>
+  <meta charset="utf-8">
+  <title>HMI panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 1rem; }
+  </style>
 </head>
 <body>
-    <h1>HMI Debug Panel</h1>
+  <!-- inline the full gui.svg here -->
+  <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--  gui.svg  –  tiny HMI panel  -->
 
-    <!-- Placeholder links for future API endpoints -->
-    <a href="/api/status">GET /api/status</a>
-    <a href="/api/toggle">POST /api/toggle</a>
+<svg
+   width="100%"
+   height="100%"
+   viewBox="0 0 320 240"
+   version="1.1"
+   id="svg3"
+   sodipodi:docname="gui.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:xhtml="http://www.w3.org/1999/xhtml ">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2.4479167"
+     inkscape:cx="70.468084"
+     inkscape:cy="215.89787"
+     inkscape:window-width="2560"
+     inkscape:window-height="1377"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="setGroup" />
+  <defs
+     id="defs3" />
+  <!-- Simple background -->
+  <rect
+     width="100%"
+     height="100%"
+     fill="#f4f4f4"
+     id="rect1"
+     x="0"
+     y="0" />
+  <!-- Status label -->
+  <text
+     id="status"
+     x="20"
+     y="40"
+     font-size="20px"
+     fill="#333333">waiting …</text>
+  <text
+     id="timeLabel"
+     x="19.18298"
+     y="140.49362"
+     font-size="20px"
+     fill="#333333">Current Time…</text>
+  <!-- ===== Progress bar gauge ===== -->
+  <g
+     id="gauge1"
+     transform="translate(33.07234,178.38298)"
+     style="display:inline">
+    <!-- background rail -->
+    <rect
+       x="0"
+       y="0"
+       width="200"
+       height="20"
+       rx="5"
+       fill="#e0e0e0"
+       id="rect2" />
+    <!-- moving bar (will be stretched by JS) -->
+    <rect
+       id="gauge1_bar"
+       x="0"
+       y="0"
+       width="85"
+       height="20"
+       rx="5"
+       fill="#4caf50" />
+    <!-- numeric label -->
+    <text
+       id="gauge1_val"
+       x="100"
+       y="-8"
+       text-anchor="middle"
+       font-size="14px">0 %</text>
+  </g>
+  <!-- Toggle button -->
+  <g
+     id="btn_toggle"
+     cursor="pointer"
+     onclick="{&#10;      fetch('/api/toggle', {method: 'POST'})&#10;        .then(() =&gt; updateStatus())&#10;        .catch(e =&gt; statusTxt.textContent = 'err');&#10;    }">
+    <rect
+       x="20"
+       y="60"
+       width="100"
+       height="40"
+       rx="6"
+       fill="#4caf50"
+       id="rect3" />
+    <text
+       x="70"
+       y="85"
+       text-anchor="middle"
+       fill="#ffffff"
+       font-size="14px"
+       id="text2">TOGGLE</text>
+  </g>
+  <!-- Refresh status button -->
+  <g
+     id="btn_status"
+     cursor="pointer">
+    <rect
+       x="140"
+       y="60"
+       width="100"
+       height="40"
+       rx="6"
+       fill="#2196f3"
+       id="rect4" />
+    <text
+       x="190"
+       y="85"
+       text-anchor="middle"
+       fill="#ffffff"
+       font-size="14px"
+       id="text3">REFRESH</text>
+  </g>
+    <!-- ===== Temperature set-point control ===== -->
+  <g id="setGroup" transform="translate(20,200)">
+    <!-- background frame (optional) -->
+    <rect x="0" y="-2" width="280" height="24" rx="4" fill="#ffffff" stroke="#ccc" stroke-width="1"/>
 
-    <!-- Example SVG GUI placeholder -->
-    <a href="/gui.svg">Open SVG GUI</a>
+    <!-- slider inside foreignObject -->
+    <foreignObject x="0" y="-2" width="180" height="20">
+      <input xmlns="http://www.w3.org/1999/xhtml"
+             id="tempSlider" type="range" min="5" max="40" step="0.5" value="22"
+             style="width:100%; height:100%; margin:0; padding:0; border:none;"/>
+    </foreignObject>
+
+    <!-- value label -->
+    <text id="setVal" x="190" y="12" font-size="14px">22.0 °C</text>
+
+    <!-- SET button -->
+    <g id="btn_set" cursor="pointer">
+      <rect x="210" y="-2" width="60" height="20" rx="4" fill="#4CAF50"/>
+      <text x="240" y="12" text-anchor="middle" font-size="12px" fill="#fff">SET</text>
+    </g>
+  </g>
+  </g>
+  <!-- Embedded logic -->
+  <script
+     type="application/ecmascript"
+     id="script1"><![CDATA[
+    const statusTxt = document.getElementById('status');
+    const timeLbl = document.getElementById('timeLabel');
+
+    /* ---------- existing HTTP helpers ---------- */
+    function updateStatus() {
+      fetch('/api/status')
+        .then(r => r.text())
+        .then(t => statusTxt.textContent = t)
+        .catch(e => statusTxt.textContent = 'err');
+    }
+    document.getElementById('btn_status').addEventListener('click', updateStatus);
+    updateStatus();          // initial read
+
+    /* ---------- new WebSocket time feed ---------- */
+    const ws = new WebSocket(`ws://${location.host}/ws/tags`);
+    ws.onopen  = () => console.log('WS time feed opened');
+
+    ws.onmessage = ev => {
+      const payload = JSON.parse(ev.data);   // {“gauge”: 73}
+      setGauge(payload.gauge);
+      timeLbl.textContent = payload.date_str;
+    };
+
+    ws.onclose = () => console.log('WS closed');
+
+    /* ---------- gauge helpers ---------- */
+    const gaugeBar  = document.getElementById('gauge1_bar');
+    const gaugeTxt  = document.getElementById('gauge1_val');
+    const MAX       = 200;                 // match rail width above
+
+    function setGauge(percent){             // percent 0..100
+      const w = Math.max(0, Math.min(MAX, percent * MAX / 100));
+      gaugeBar.setAttribute('width', w);
+      gaugeTxt.textContent = percent.toFixed(0) + ' %';
+    }
+    const slider = document.getElementById('tempSlider');
+    const setVal = document.getElementById('setVal');
+
+    // sync label while dragging
+    slider.addEventListener('input', () => setVal.textContent = slider.value + ' °C');
+
+    // send new set-point to server
+    document.getElementById('btn_set').addEventListener('click', async () => {
+      const payload = {setpoint: parseFloat(slider.value)};
+      try {
+        const r = await fetch('/api/setpoint', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const ans = await r.json();
+        if (ans.status === 'ok') {          // подтверждение
+          slider.value = ans.setpoint;      // синхронизировать если сервер округлил
+          setVal.textContent = ans.setpoint + ' °C';
+        } else {
+          alert('Error: ' + ans.msg);
+        }
+      } catch (e) {
+        alert('Network error');
+      }
+    });
+  ]]></script>
+</svg>
+
+  </svg>
 </body>
 </html>
